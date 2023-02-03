@@ -10,9 +10,6 @@ namespace option {
 namespace po = boost::program_options;
 
 void parse(int argc, const char **argv) {
-  (void)argc;
-  (void)argv;
-
   // Declare a group of options that will be
   // allowed only on command line
   po::options_description generic("Generic options");
