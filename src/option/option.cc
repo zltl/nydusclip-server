@@ -23,16 +23,17 @@ void parse(int argc, const char **argv) {
   // config file
   int opt;
   po::options_description config("Configuration");
-  config.add_options()("optimization", po::value<int>(&opt)->default_value(10),
-                       "optimization level")  //
+  config.add_options()  //
+      ("optimization", po::value<int>(&opt)->default_value(10),
+       "optimization level")  //
       ("include-path,I", po::value<std::vector<std::string> >()->composing(),
        "include path");
 
   // Hidden options, will be allowed both on command line and
   // in config file, but will not be shown to the user.
   po::options_description hidden("Hidden options");
-  hidden.add_options()("input-file", po::value<std::vector<std::string> >(),
-                       "input file");
+  hidden.add_options()  //
+      ("input-file", po::value<std::vector<std::string> >(), "input file");
 
   po::options_description cmdline_options;
   cmdline_options.add(generic).add(config).add(hidden);
@@ -60,7 +61,6 @@ void parse(int argc, const char **argv) {
   }
 
   std::cout << "adfafds" << vm["optimization"].as<int>() << std::endl;
-
 }
 
 }  // namespace option
