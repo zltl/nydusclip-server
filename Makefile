@@ -89,7 +89,9 @@ deps:
 	$(DEPS_GET) openssl-3.0.7
 	$(DEPS_GET) fmt-9.1.0
 	$(DEPS_GET) spdlog-1.11.0
-	# $(DEPS_GET) double-conversion-3.2.1
+	$(DEPS_GET) double-conversion-3.2.1
+	$(DEPS_GET) libevent-2.1.12
+	$(DEPS_GET) leveldb-1.23
 
 clean:
 	$(MAKE) clean -C tests
