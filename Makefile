@@ -6,8 +6,8 @@
 .ONESHELL:
 
 # gcc only, maybe support clang later.
-CC=gcc
-CXX=g++
+# CC=gcc
+# CXX=g++
 
 # The path of project.
 PROJECT_ROOT:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
@@ -20,7 +20,7 @@ ifneq ($(RELEASE),)
 	R_TARGET_DIR = $(TARGET_DIR)/release
 	C_COMMON_FLAGS = -O3
 else
-	DEBUG_FLAGS = -DDEBUG -g
+	DEBUG_FLAGS = -g
 	R_TARGET_DIR = $(TARGET_DIR)/debug
 endif
 
@@ -38,16 +38,19 @@ $(shell mkdir -p $(R_TARGET_DIR)/deps/{include,lib})
 $(shell mkdir -p $(R_TARGET_DIR)/obj)
 $(shell mkdir -p $(R_TARGET_DIR)/pcm)
 
-# add sanitize flags if defined environment variable SANITIZE=y
-ifneq ($(SANITIZE),)
-	ifneq ($(DEBUG_FLAGS),)
+# add sanitize flags if defined environment variable SANITIZE!=no
+ifneq ($(SANITIZE),no)
+	ifeq ($(DEBUG_FLAGS),)
 		DEBUG_FLAGS += -g
 	endif
-	DEBUG_FLAGS += -fsanitize=address -lasan
+	DEBUG_FLAGS += -fsanitize=address
+	ifneq ($(CC),clang)
+		DEBUG_FLAGS += -lasan
+	endif
 endif
 
-# use C++17, but sometimes use C++20
-USE_CXX_VERSION=17
+# use C++23
+USE_CXX_VERSION=2b
 
 # strict mode, for C and C++
 MY_C_COMMON_FLAGS += -Werror -Wall -Wextra -pedantic -ffile-prefix-map=$(PROJECT_ROOT)/src/=
@@ -56,11 +59,15 @@ MY_C_STANDARD := -std=c17
 # use C++23, just for C++
 MY_CXX_STANDARD := -std=c++${USE_CXX_VERSION}
 
+ifeq ($(CC),clang)
+	MY_C_COMMON_FLAGS += $(shell llvm-config --cxxflags)
+endif
+
 # flags pass to CC only
 MY_CFLAGS:= $(MY_C_COMMON_FLAGS) $(DEBUG_FLAGS) $(MY_C_STANDARD)
 # flags pass to CXX only
 # locate pcm files into target/{debug/release}/pcm
-MY_CXXFLAGS:= $(MY_C_COMMON_FLAGS) $(MY_CXX_STANDARD)
+MY_CXXFLAGS:= $(MY_C_COMMON_FLAGS) $(DEBUG_FLAGS) $(MY_CXX_STANDARD)
 # -fmodules-ts '-fmodule-mapper=|@g++-mapper-server -r'$(R_TARGET_DIR)/pcm
 
 # export all variables that defined
@@ -87,7 +94,7 @@ deps:
 	$(DEPS_GET) benchmark-1.7.1
 	$(DEPS_GET) boost-1.18.0.rc1
 	$(DEPS_GET) openssl-3.0.7
-	$(DEPS_GET) fmt-9.1.0
+	# $(DEPS_GET) fmt-9.1.0
 	$(DEPS_GET) spdlog-1.11.0
 	$(DEPS_GET) double-conversion-3.2.1
 	$(DEPS_GET) libevent-2.1.12

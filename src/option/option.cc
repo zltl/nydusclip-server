@@ -60,7 +60,7 @@ void parse(int argc, const char **argv) {
     po::notify(vm);
   }
 
-  std::cout << "adfafds" << vm["optimization"].as<int>() << std::endl;
+  // std::cout << "adfafds" << vm["optimization"].as<int>() << std::endl;
 }
 
 }  // namespace option

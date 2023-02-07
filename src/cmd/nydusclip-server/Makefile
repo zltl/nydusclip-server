@@ -14,13 +14,21 @@ objs_cc = $(patsubst %.cc,$(OBJ_DIR)/%.cc.o,$(sources_c))
 mylibs = $(wildcard $(R_TARGET_DIR)/*.a)
 
 mlibs = -llog \
-        -lspdlog \
-        -lfmt
+	-lstatus \
+	-lspdlog \
+	-loption \
+	-lboost_program_options \
+	-lco_event \
+	-levent \
+	-levent_core \
+	-levent_extra \
+	-levent_openssl \
+	-levent_pthreads
 
 all: $(R_TARGET_DIR)/$(sub_name)
 
 $(R_TARGET_DIR)/$(sub_name): $(objs_cc) $(mylibs)
-	$(CXX) $(MY_CXXFLAGS) $(EXTRA_LIB_FLAG) $^ -o $@ -lboost_program_options -lfmt -o $@
+	$(CXX) $(MY_CXXFLAGS) $(EXTRA_LIB_FLAG) $^ -o $@ $(mlibs)
 
 $(OBJ_DIR)/%.cc.o: $(CURR_DIR)/%.cc
 	$(CXX) $(MY_CXXFLAGS) $(EXTRA_INCLUDE_FLAG) $(MODECFLAGS) -c $< -o $@
