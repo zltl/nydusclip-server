@@ -22,7 +22,7 @@ EventBase::~EventBase() {
 
 event_base* EventBase::GetCBase() { return base_; }
 
-Result<void> EventBase::Reinit() {
+Result<Void> EventBase::Reinit() {
   int r = event_reinit(base_);
   if (r != 0) {
     return unexpected(
@@ -81,7 +81,7 @@ Result<EventBase::R> EventBase::Loop(int flags) {
   }
 }
 
-Result<void> EventBase::LoopExit(std::chrono::nanoseconds dura) {
+Result<Void> EventBase::LoopExit(std::chrono::nanoseconds dura) {
   struct timeval tv;
   std::chrono::seconds const sec =
       std::chrono::duration_cast<std::chrono::seconds>(dura);
@@ -97,7 +97,7 @@ Result<void> EventBase::LoopExit(std::chrono::nanoseconds dura) {
       Error{Code::kLibeventError, "event_base_loopexit() - an error occurred"});
 }
 
-Result<void> EventBase::LoopBreak() {
+Result<Void> EventBase::LoopBreak() {
   int r = event_base_loopbreak(base_);
   if (r == 0) {
     return {};
@@ -106,7 +106,7 @@ Result<void> EventBase::LoopBreak() {
                                "event_base_loopbreak() - an error occurred"});
 }
 
-Result<void> EventBase::SetEvent(Event& e) {
+Result<Void> EventBase::SetEvent(Event& e) {
   int r = event_base_set(base_, e.GetCEvent());
   if (r == -1) {
     return std::unexpected(

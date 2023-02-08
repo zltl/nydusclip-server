@@ -36,7 +36,7 @@ void Event::Callback(SocketFd fd, EventType events) {
   callback_(events);
 }
 
-Result<void> Event::Add() {
+Result<Void> Event::Add() {
   int r = event_add(event_, nullptr);
   if (r == 0) {
     return {};
@@ -45,7 +45,7 @@ Result<void> Event::Add() {
       Error{Code::kLibeventError, "event_add() - an error occurred"});
 }
 
-Result<void> Event::Add(std::chrono::nanoseconds dura) {
+Result<Void> Event::Add(std::chrono::nanoseconds dura) {
   struct timeval tv;
   std::chrono::seconds const sec =
       std::chrono::duration_cast<std::chrono::seconds>(dura);
@@ -62,7 +62,7 @@ Result<void> Event::Add(std::chrono::nanoseconds dura) {
       Error{Code::kLibeventError, "event_add() - an error occurred"});
 }
 
-Result<void> Event::Del() {
+Result<Void> Event::Del() {
   int r = event_del_noblock(event_);
   if (r == 0) {
     return {};

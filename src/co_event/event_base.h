@@ -35,6 +35,7 @@ namespace co_event {
 using nydus::status::Code;
 using nydus::status::Error;
 using nydus::status::Result;
+using nydus::status::Void;
 using std::unexpected;
 
 class Event;
@@ -55,7 +56,7 @@ class EventBase : public boost::noncopyable {
   /**
      Reinitialize the event base after a fork
    */
-  Result<void> Reinit();
+  Result<Void> Reinit();
 
   enum class R {
     kOK,
@@ -78,7 +79,7 @@ class EventBase : public boost::noncopyable {
   int GetAddedEventNum();
 
   // Associate a different event base with an event
-  Result<void> SetEvent(Event& e);  // TODO
+  Result<Void> SetEvent(Event& e);  // TODO
 
   enum LoopType {
     kOnce = EVLOOP_ONCE,
@@ -88,15 +89,13 @@ class EventBase : public boost::noncopyable {
 
   Result<R> Loop(int flags);
 
-  Result<void> LoopExit(std::chrono::nanoseconds dura);
+  Result<Void> LoopExit(std::chrono::nanoseconds dura);
 
-  Result<void> LoopBreak();
+  Result<Void> LoopBreak();
 
  private:
   event_base* base_{};
 };
-
-
 
 }  // namespace co_event
 }  // namespace nydus

@@ -33,6 +33,11 @@ struct Error {
 
 bool operator==(const Error& lhs, const Error& rhs);
 
+/**
+   Result<Void> need this.
+ */
+struct Void {};
+
 template <class T, class E = Error>
 using Result = ::std::expected<T, E>;
 

@@ -23,14 +23,21 @@ TEST(LibEvent, Timer1ns) {
         triggered = true;
       },
       a, b, c));
-  timer_event->Add(1ns);
-  auto x = base->Dispatch().and_then([](auto r) -> Result<EventBase::R> {
+
+  using RT = Result<EventBase::R>;
+
+  auto x = timer_event->Add(1ns);
+  if (!x.has_value()) {
+    FAIL() << "Add event failed" << x.error().to_string();
+  }
+
+  auto y = base->Dispatch().and_then([&](auto r) -> RT {
     DEBUG("base loop return success: {}", static_cast<int>(r));
     return r;
   });
-  if (!x.has_value()) {
-    FAIL() << "EventBase loop exit failed: " << x.error().to_string();
-  }
 
   ASSERT_TRUE(triggered);
+  if (!y.has_value()) {
+    FAIL() << "EventBase loop exit failed: " << x.error().to_string();
+  }
 }

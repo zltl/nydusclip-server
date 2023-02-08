@@ -2,6 +2,7 @@
 
 #include <event2/buffer.h>
 
+#include <exception>
 #include <expected>
 
 #include "boost/core/noncopyable.hpp"
@@ -13,6 +14,7 @@ namespace co_event {
 using nydus::status::Code;
 using nydus::status::Error;
 using nydus::status::Result;
+using nydus::status::Void;
 using std::unexpected;
 
 /**
@@ -35,8 +37,15 @@ class Buffer : public boost::noncopyable {
     }
   }
 
-  Result<void> SetMaxRead() {
-    return {};
+  size_t Length() { return evbuffer_get_length(buffer_); }
+
+  Result<Void> Add(const void* data_in, size_t len) {
+    int r = evbuffer_add(buffer_, data_in, len);
+    if (r == 0) {
+      return {};
+    }
+    return std::unexpected(
+        Error{Code::kLibeventError, "evbuffer_add() - failure"});
   }
 
  private:

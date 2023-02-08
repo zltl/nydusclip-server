@@ -26,6 +26,7 @@ class EventBase;
 using nydus::status::Code;
 using nydus::status::Error;
 using nydus::status::Result;
+using nydus::status::Void;
 using std::unexpected;
 using namespace std::placeholders;
 
@@ -37,11 +38,11 @@ class Event : public boost::noncopyable {
  public:
   template <class F, class... Args>
   Event(EventBase& base, SocketFd fd, EventType events, F&& cb,
-               Args&&... cb_args)
+        Args&&... cb_args)
       : event_{event_new(GetCBase(base), fd, events, EventCallback, this)},
         callback_{
             std::bind(std::forward<F>(cb), _1, std::forward<Args>(cb_args)...)},
-        base_(&base){}
+        base_(&base) {}
 
   template <class F, class... Args>
   static Event* CreateTimer(EventBase& base, F&& cb, Args&&... cb_args) {
@@ -62,11 +63,11 @@ class Event : public boost::noncopyable {
 
   void Callback(SocketFd fd, EventType events);
 
-  Result<void> Add();
+  Result<Void> Add();
 
-  Result<void> Add(std::chrono::nanoseconds dura);
+  Result<Void> Add(std::chrono::nanoseconds dura);
 
-  Result<void> Del();
+  Result<Void> Del();
 
   void Activate(EventType events);
 
