@@ -37,75 +37,66 @@ using nydus::status::Error;
 using nydus::status::Result;
 using std::unexpected;
 
+class Event;
+
 /**
    Class to hold information and state for Libevent dispatch loop.
  */
-class EventBase : boost::noncopyable {
+class EventBase : public boost::noncopyable {
  public:
-  EventBase() : base_{event_base_new()} {}
-  explicit EventBase(event_base* base) : base_{base} {}
-  ~EventBase() {
-    if (base_) event_base_free(base_);
-  }
+  EventBase();
+  explicit EventBase(event_base* base);
+  EventBase(EventBase&& other);
+  EventBase& operator=(EventBase&& other);
+  ~EventBase();
+
+  event_base* GetCBase();
 
   /**
      Reinitialize the event base after a fork
    */
-  Result<void> Reinit() {
-    int r = event_reinit(base_);
-    if (r != 0) {
-      return unexpected(
-          Error{Code::kLibEventError,
-                "event_reinit() - some events could not be re-added"});
-    }
+  Result<void> Reinit();
 
-    return {};
-  }
+  enum class R {
+    kOK,
+    kNoEvent,
+  };
 
   /**
      Event dispatching loop.
 
-     @return 0 if successful, or 1 if we exited because
-     no events were pending or active.
+     @return EventBase::Result::kOK if successful, or
+     EventBase::Result::kNoEvent if we exited because no events were pending or
+     active.
    */
-  Result<int> Dispatch() {
-    int r = event_base_dispatch(base_);
-    switch (r) {
-      case 0:
-        return 0;
-      case 1:
-        return 1;
-      default:
-        return unexpected(Error{Code::kLibEventError,
-                                "event_base_dispatch() - an error occurred"});
-    }
-  }
+  Result<R> Dispatch();
 
-  Result<std::chrono::steady_clock::time_point> GetTimeMonotonic() {
-    struct timeval tv;
-    int r = event_gettime_monotonic(base_, &tv);
-    if (r == -1) {
-      return unexpected(Error{Code::kLibEventError,
-                              "event_gettime_monotonic() - an error occured"});
-    }
-    using namespace std::chrono;
-    return steady_clock::time_point{seconds{tv.tv_sec} +
-                                    microseconds{tv.tv_usec}};
-  }
+  Result<std::chrono::steady_clock::time_point> GetTimeMonotonic();
 
-  int GetActiveEventNum() {
-    return event_base_get_num_events(base_, EVENT_BASE_COUNT_ACTIVE);
-  }
-  int GetVirtualEventNum() {
-    return event_base_get_num_events(base_, EVENT_BASE_COUNT_VIRTUAL);
-  }
-  int GetAddedEventNum() {
-    return event_base_get_num_events(base_, EVENT_BASE_COUNT_ADDED);
-  }
+  int GetActiveEventNum();
+  int GetVirtualEventNum();
+  int GetAddedEventNum();
+
+  // Associate a different event base with an event
+  Result<void> SetEvent(Event& e);  // TODO
+
+  enum LoopType {
+    kOnce = EVLOOP_ONCE,
+    kNonBlock = EVLOOP_NONBLOCK,
+    kNoExitOnEmpty = EVLOOP_NO_EXIT_ON_EMPTY,
+  };
+
+  Result<R> Loop(int flags);
+
+  Result<void> LoopExit(std::chrono::nanoseconds dura);
+
+  Result<void> LoopBreak();
 
  private:
   event_base* base_{};
 };
+
+
 
 }  // namespace co_event
 }  // namespace nydus

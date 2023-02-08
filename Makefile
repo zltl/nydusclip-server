@@ -1,4 +1,4 @@
-.PHONY: deps clean src \
+.PHONY: deps clean src build_test build_benchmark \
 	test build run_test benchmark run_benchmark
 
 # Use one shell in targets. Multiple lines of commands in a target run
@@ -54,6 +54,7 @@ USE_CXX_VERSION=2b
 
 # strict mode, for C and C++
 MY_C_COMMON_FLAGS += -Werror -Wall -Wextra -pedantic -ffile-prefix-map=$(PROJECT_ROOT)/src/=
+MY_TEST_FLAGS = -ffile-prefix-map=$(PROJECT_ROOT)/=
 # use c17, just for C
 MY_C_STANDARD := -std=c17
 # use C++23, just for C++
@@ -67,8 +68,8 @@ endif
 MY_CFLAGS:= $(MY_C_COMMON_FLAGS) $(DEBUG_FLAGS) $(MY_C_STANDARD)
 # flags pass to CXX only
 # locate pcm files into target/{debug/release}/pcm
-MY_CXXFLAGS:= $(MY_C_COMMON_FLAGS) $(DEBUG_FLAGS) $(MY_CXX_STANDARD)
-# -fmodules-ts '-fmodule-mapper=|@g++-mapper-server -r'$(R_TARGET_DIR)/pcm
+MY_CXXFLAGS:= $(MY_C_COMMON_FLAGS) $(DEBUG_FLAGS) $(MY_CXX_STANDARD) \
+	 -fmodules-ts '-fmodule-mapper=|@g++-mapper-server -r'$(R_TARGET_DIR)/pcm
 
 # export all variables that defined
 export
@@ -76,16 +77,19 @@ export
 # alias for deps.sh script.
 DEPS_GET:= $(PROJECT_ROOT)/deps/deps.sh
 
-all: src benchmarks tests
+all: src benchmarks test
 src: deps
 	$(MAKE) -C src
-test: src
+test: run_test
+
+build_test: src
 	$(MAKE) -C tests
-run_test: test
-	$(MAKE) run_test -C test
-benchmark: src
+run_test: build_test
+	$(MAKE) run_test -C tests
+build_benchmark: src
 	$(MAKE) -C benchmarks
-run_benchmark: benchmark
+benchmark: run_banchmark
+run_benchmark: build_benchmark
 	$(MAKE) run_benchmarks -C benchmarks
 
 # download and install dependencies defined in ./deps/deps-xxxxx.sh

@@ -1,7 +1,6 @@
-module;
+#pragma once
 
-export module tests.turtle;
-export class Turtle {
+class Turtle {
 public:
   virtual ~Turtle() {}
   virtual void PenUp() = 0;

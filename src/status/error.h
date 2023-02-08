@@ -15,7 +15,7 @@ enum class Code {
   kOK = 0,
 
   // 6000-7000 libevent error
-  kLibEventError = 6000,
+  kLibeventError = 6000,
 };
 
 /**

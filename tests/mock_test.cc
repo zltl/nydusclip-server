@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-import turtle;
+#include "turtle.h"
 
 class MockTurtle : public Turtle {
  public:

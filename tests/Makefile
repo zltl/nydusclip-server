@@ -1,18 +1,34 @@
 .PHONY: all run_test clean
 
+.ONESHELL:
+
+CURR_DIR=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 OBJ_DIR:=$(R_TARGET_DIR)/tests
 $(shell mkdir -p $(OBJ_DIR))
 
+sources_c = $(wildcard $(CURR_DIR)/*.cc)
+objs_cc = $(patsubst %.cc,$(OBJ_DIR)/%.cc.o,$(sources_c))
+
+link_libs = -lgtest \
+	-lgmock  \
+	-lgtest_main \
+	-lgmock_main \
+	-llog \
+	-lstatus \
+	-lspdlog \
+	-loption \
+	-lboost_program_options \
+	-lco_event \
+	-levent \
+	-levent_core \
+	-levent_extra \
+	-levent_openssl \
+	-levent_pthreads \
+	-lasan
+
 O:=$(OBJ_DIR)
 
-all: $(OBJ_DIR)/my_unit_test
-
-MODECFLAGS := -static
-
-my_unit_object := $(O)/basic_test.cc.o \
-		  $(O)/fixture_test.cc.o \
-		  $(O)/turtle.cc.o \
-		  $(O)/mock_test.cc.o
+all: $(OBJ_DIR)/nydus_unit_test
 
 run_test:
 	for r in $$(ls $(R_TARGET_DIR)/tests/); do
@@ -22,11 +38,8 @@ run_test:
 		fi
 	done
 
-$(OBJ_DIR)/my_unit_test: $(my_unit_object)
-	$(CXX) $(MY_CXXFLAGS) $(EXTRA_LIB_FLAG) $^ -o $@ -lgtest -lgtest_main -lgmock -lgmock_main
-
-$(OBJ_DIR)/%.cc.o: %.cc
-	$(CXX) $(MY_CXXFLAGS) $(EXTRA_INCLUDE_FLAG) $(MODECFLAGS) -c $< -o $@
+$(OBJ_DIR)/nydus_unit_test: $(sources_c)
+	$(CXX) $(MY_CXXFLAGS) $(MY_TEST_FLAGS) $(EXTRA_INCLUDE_FLAG) $(EXTRA_LIB_FLAG) $^ -o $@ $(link_libs)
 
 clean:
 	rm -rf $(OBJ_DIR)

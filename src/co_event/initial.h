@@ -9,6 +9,10 @@ class Initial {
 
   static void Initialize();
 
+  static void LibeventEnableDebugLogging();
+
+  static void Uninitilize();
+
  private:
   static bool is_initialized_;
 };

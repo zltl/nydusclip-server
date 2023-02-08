@@ -4,8 +4,6 @@
 
 using namespace std;
 
-TEST(TestSuiteName, TestName) { return; }
-
 TEST(TestBasic, Assert) {
   vector<int> x{1, 2, 3, 4};
   vector<int> y{1, 2, 3, 4};
