@@ -1,57 +1,113 @@
 #pragma once
 
-#include <event2/buffer.h>
-
-#include <exception>
-#include <expected>
-
-#include "boost/core/noncopyable.hpp"
-#include "status/error.h"
+#include <cassert>
+#include <cstddef>
+#include <cstring>
+#include <string>
 
 namespace nydus {
 namespace co_event {
 
-using nydus::status::Code;
-using nydus::status::Error;
-using nydus::status::Result;
-using nydus::status::Void;
-using std::unexpected;
-
 /**
-   Wrapper of libevent::evbuffer
+   reference to a buffer, not owns the data.
  */
-class Buffer : public boost::noncopyable {
+class BufferRef {
  public:
-  Buffer() : buffer_{evbuffer_new()} {}
-  Buffer(Buffer&& other) : buffer_{other.buffer_} { other.buffer_ = nullptr; }
-  Buffer& operator=(Buffer&& other) {
-    buffer_ = other.buffer_;
-    other.buffer_ = nullptr;
-    return *this;
+  static BufferRef New(size_t s) {
+    char* data_{new char[s]};
+    size_t size_{s} {}
+    return BufferRef(data_, size_);
   }
-
-  ~Buffer() {
-    if (buffer_) {
-      evbuffer_free(buffer_);
-      buffer_ = nullptr;
+  static void Delete(BufferRef& r) {
+    if (r.data_) {
+      delete[] r.data_;
     }
   }
 
-  size_t Length() { return evbuffer_get_length(buffer_); }
+  // Create an empty buffer.
+  BufferRef() : data_((char*)""), size_(0) {}
 
-  Result<Void> Add(const void* data_in, size_t len) {
-    int r = evbuffer_add(buffer_, data_in, len);
-    if (r == 0) {
-      return {};
-    }
-    return std::unexpected(
-        Error{Code::kLibeventError, "evbuffer_add() - failure"});
+  // Create a buffer that refers to d[0,n-1].
+  BufferRef(void* d, size_t n) : data_((char*)d), size_(n) {}
+
+  // Create a buffer that refers to the contents of "s"
+  BufferRef(std::string& s) : data_(s.data()), size_(s.size()) {}
+
+  // Create a buffer that refers to s[0,strlen(s)-1]
+  BufferRef(char* s) : data_(s), size_(strlen(s)) {}
+
+  // Intentionally copyable.
+  BufferRef(BufferRef&) = default;
+  BufferRef& operator=(BufferRef&) = default;
+
+  // Return a pointer to the beginning of the referenced data
+  char* data() { return data_; }
+
+  // Return the length (in bytes) of the referenced data
+  size_t size() const { return size_; }
+  void set_size(size_t l) { size_ = l; }
+
+  // Return true iff the length of the referenced data is zero
+  bool IsEmpty() const { return size_ == 0; }
+
+  // Return the ith byte in the referenced data.
+  // REQUIRES: n < size()
+  char operator[](size_t n) const {
+    assert(n < size());
+    return data_[n];
+  }
+
+  // Change this buffer to refer to an empty array
+  void clear() {
+    data_ = (char*)"";
+    size_ = 0;
+  }
+
+  // Drop the first "n" bytes from this buffer.
+  void remove_prefix(size_t n) {
+    assert(n <= size());
+    data_ += n;
+    size_ -= n;
+  }
+
+  // Return a string that contains the copy of the referenced data.
+  std::string ToString() const { return std::string(data_, size_); }
+
+  // Three-way comparison.  Returns value:
+  //   <  0 iff "*this" <  "b",
+  //   == 0 iff "*this" == "b",
+  //   >  0 iff "*this" >  "b"
+  int compare(const BufferRef& b) const;
+
+  // Return true iff "x" is a prefix of "*this"
+  bool starts_with(const BufferRef& x) const {
+    return ((size_ >= x.size_) && (memcmp(data_, x.data_, x.size_) == 0));
   }
 
  private:
-  evbuffer* buffer_{};
+  char* data_;
+  size_t size_;
 };
 
-}  // namespace co_event
+inline bool operator==(const BufferRef& x, const BufferRef& y) {
+  return ((x.size() == y.size()) &&
+          (memcmp(x.data(), y.data(), x.size()) == 0));
+}
 
+inline bool operator!=(const BufferRef& x, const BufferRef& y) {
+  return !(x == y);
+}
+
+inline int BufferRef::compare(const BufferRef& b) const {
+  const size_t min_len = (size_ < b.size_) ? size_ : b.size_;
+  int r = memcmp(data_, b.data_, min_len);
+  if (r == 0) {
+    if (size_ < b.size_)
+      r = -1;
+    else if (size_ > b.size_)
+      r = +1;
+  }
+  return r;
+}
+}  // namespace co_event
 }  // namespace nydus
