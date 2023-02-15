@@ -14,8 +14,7 @@ namespace status {
 enum class Code {
   kOK = 0,
 
-  // 6000-7000 libevent error
-  kLibeventError = 6000,
+  kAsioError = 7001,
 };
 
 /**
@@ -42,5 +41,10 @@ template <class T, class E = Error>
 using Result = ::std::expected<T, E>;
 
 }  // namespace status
+
+using namespace nydus::status;
+using nydus::status::Code;
+using nydus::status::Error;
+using nydus::status::Void;
 
 }  // namespace nydus

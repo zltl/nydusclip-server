@@ -1,13 +1,12 @@
-#include "co_event/co_event.h"
-#include "co_event/initial.h"
 #include "log/log.h"
 #include "option/option.h"
-#include "co_event/event_base.h"
-#include "co_event/event.h"
+#include "server/server.h"
+
+using namespace nydus;
+using Conf = nydus::option::Conf;
 
 int main(int argc, const char** argv) {
-
-  nydus::option::parse(argc, argv);
+  option::parse(Conf::conf(), argc, argv);
 
   nydus::log::init();
 
@@ -18,9 +17,8 @@ int main(int argc, const char** argv) {
   ERROR("ERROR");
   CRITICAL("HELLO");
 
-  nydus::co_event::Initial::Initialize();
-  nydus::co_event::Initial::LibeventEnableDebugLogging();
+  // try server/http
+  nydus::server::Tx();
 
-  nydus::co_event::Initial::Uninitilize();
   return 0;
 }

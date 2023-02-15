@@ -18,12 +18,6 @@ link_libs = -lgtest \
 	-lspdlog \
 	-loption \
 	-lboost_program_options \
-	-lco_event \
-	-levent \
-	-levent_core \
-	-levent_extra \
-	-levent_openssl \
-	-levent_pthreads \
 	-lasan
 
 O:=$(OBJ_DIR)

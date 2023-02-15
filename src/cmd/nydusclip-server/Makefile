@@ -13,17 +13,12 @@ objs_cc = $(patsubst %.cc,$(OBJ_DIR)/%.cc.o,$(sources_c))
 
 mylibs = $(wildcard $(R_TARGET_DIR)/*.a)
 
-mlibs = -llog \
+mlibs = -lserver \
+	-llog \
 	-lstatus \
 	-lspdlog \
 	-loption \
 	-lboost_program_options \
-	-lco_event \
-	-levent \
-	-levent_core \
-	-levent_extra \
-	-levent_openssl \
-	-levent_pthreads
 
 all: $(R_TARGET_DIR)/$(sub_name)
 

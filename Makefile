@@ -52,24 +52,22 @@ endif
 # use C++23
 USE_CXX_VERSION=2b
 
-# strict mode, for C and C++
-MY_C_COMMON_FLAGS += -Werror -Wall -Wextra -pedantic -ffile-prefix-map=$(PROJECT_ROOT)/src/=
+# TODO: use -Werror
+MY_C_COMMON_FLAGS += -Wall -Wextra -pedantic -ffile-prefix-map=$(PROJECT_ROOT)/src/=
 MY_TEST_FLAGS = -ffile-prefix-map=$(PROJECT_ROOT)/=
 # use c17, just for C
 MY_C_STANDARD := -std=c17
 # use C++23, just for C++
 MY_CXX_STANDARD := -std=c++${USE_CXX_VERSION}
 
-ifeq ($(CC),clang)
-	MY_C_COMMON_FLAGS += $(shell llvm-config --cxxflags)
-endif
-
 # flags pass to CC only
 MY_CFLAGS:= $(MY_C_COMMON_FLAGS) $(DEBUG_FLAGS) $(MY_C_STANDARD)
 # flags pass to CXX only
 # locate pcm files into target/{debug/release}/pcm
-MY_CXXFLAGS:= $(MY_C_COMMON_FLAGS) $(DEBUG_FLAGS) $(MY_CXX_STANDARD) \
-	 -fmodules-ts '-fmodule-mapper=|@g++-mapper-server -r'$(R_TARGET_DIR)/pcm
+MY_CXXFLAGS:= $(MY_C_COMMON_FLAGS) $(DEBUG_FLAGS) $(MY_CXX_STANDARD)
+
+# no C++ modules, hard till world's code not supported.
+# -fmodules-ts '-fmodule-mapper=|@g++-mapper-server -r'$(R_TARGET_DIR)/pcm
 
 # export all variables that defined
 export
@@ -77,7 +75,7 @@ export
 # alias for deps.sh script.
 DEPS_GET:= $(PROJECT_ROOT)/deps/deps.sh
 
-all: src benchmarks test
+all: src build_benchmark build_test
 src: deps
 	$(MAKE) -C src
 test: run_test

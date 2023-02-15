@@ -15,7 +15,7 @@ d_configure() {
     cd ${SOURCE_FOLDER}
 
     # CC are gcc or clang
-    ./bootstrap.sh --prefix=${DEPS_INSTALL_DIR} --with-toolset=${CC}
+    ./bootstrap.sh --prefix=${DEPS_INSTALL_DIR} --with-toolset=${CC} cxxflags=-std=c++2b
 
     cd $OLD_DIR
 }
