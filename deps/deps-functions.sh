@@ -69,7 +69,7 @@ d_build() {
     if [ -f CMakeLists.txt ]; then
         # for cmake
         cd build
-        cmake --build . --config ${DBG}
+        cmake --build . --config ${DBG} -j $(nproc)
         cd ..
     elif [ -f Makefile ]; then
         make -j $(nproc)
