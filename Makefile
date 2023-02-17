@@ -102,7 +102,7 @@ deps:
 	$(DEPS_GET) leveldb-1.23
 	$(DEPS_GET) libpq-15.2
 	$(DEPS_GET) libpqxx-7.7.4
-	# $(DEPS_GET) rocksdb-7.9.2
+	$(DEPS_GET) rocksdb-7.9.2
 
 clean:
 	$(MAKE) clean -C tests

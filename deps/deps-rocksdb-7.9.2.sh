@@ -29,6 +29,8 @@ d_configure() {
     cmake -DCMAKE_INSTALL_PREFIX=${DEPS_INSTALL_DIR} \
           -DCMAKE_BUILD_TYPE=${DBG} \
           -DWITH_GFLAGS=OFF \
+          -DROCKSDB_BUILD_SHARED=OFF \
+          -DWITH_TESTS=OFF \
           ..
     cd ..
 

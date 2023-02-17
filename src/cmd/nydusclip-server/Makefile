@@ -19,6 +19,8 @@ mlibs = -lserver \
 	-lspdlog \
 	-loption \
 	-lboost_program_options \
+	-lpqxx \
+	-lpq
 
 all: $(R_TARGET_DIR)/$(sub_name)
 
